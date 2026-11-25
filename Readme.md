@@ -35,7 +35,6 @@ Settings are on the plugin's configuration page and save automatically as you ch
 | Setting | Default | Description |
 |---|---|---|
 | Enable Plugin | On | Master switch. When off, no lyrics are looked up or written. |
-| LRCLIB App ID | empty | Your registered LRCLIB client-side application id, sent as the `Lrclib-App-Id` header. Leave empty to send requests without one. |
 | Save plain-text lyrics when no synced lyrics exist | On | Writes a `.txt` sidecar when LRCLIB only has unsynchronised lyrics. The track is re-checked later for a synced version. |
 | Replace plain-text lyrics when synced lyrics are found | On | Moves an existing `.txt` sidecar to the recycle bin once a `.lrc` has been saved for the track. |
 | Minimum days between checks | 3 | Shortest wait before an unsuccessful track is checked again. |
@@ -82,7 +81,7 @@ The plugin queries LRCLIB's exact-signature endpoint, `GET /api/get`, with track
 | `404` or empty record | Recorded as not found |
 | `429`, `401`, timeout, network or server error | Transient - nothing recorded, retried on a later scan |
 
-Requests are sent one at a time with a minimum 400 ms gap. A `429` pauses lookups for the `Retry-After` period (60 s if absent) plus up to 30% jitter. A `401` (rejected App ID) pauses lookups for an hour and logs a hint to check the App ID setting.
+Requests are sent one at a time with a minimum 400 ms gap. A `429` pauses lookups for the `Retry-After` period (60 s if absent) plus up to 30% jitter. A `401` (rejected App ID) pauses lookups for an hour and logs a hint to check the configured App ID.
 
 ### Where lyrics are saved
 

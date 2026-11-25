@@ -30,7 +30,6 @@ namespace GNLrclib.UI.Config
             {
                 EnablePlugin = persistedConfig.EnablePlugin,
                 LibraryPaths = persistedConfig.LibraryPaths,
-                LrcLibAppId = persistedConfig.LrcLibAppId,
                 WritePlainTextWhenNoSyncedLyrics = persistedConfig.WritePlainTextWhenNoSyncedLyrics,
                 ReplacePlainTextSidecarWhenSyncedFound = persistedConfig.ReplacePlainTextSidecarWhenSyncedFound,
                 MinRecheckIntervalDays = persistedConfig.MinRecheckIntervalDays,

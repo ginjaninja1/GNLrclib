@@ -140,7 +140,6 @@ namespace GNLrclib.UI
                 if (incoming != null)
                 {
                     config.EnablePlugin = incoming.EnablePlugin;
-                    config.LrcLibAppId = (incoming.LrcLibAppId ?? string.Empty).Trim();
                     config.WritePlainTextWhenNoSyncedLyrics = incoming.WritePlainTextWhenNoSyncedLyrics;
                     config.ReplacePlainTextSidecarWhenSyncedFound = incoming.ReplacePlainTextSidecarWhenSyncedFound;
                     config.MinRecheckIntervalDays = incoming.MinRecheckIntervalDays;

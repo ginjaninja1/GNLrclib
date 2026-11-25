@@ -21,11 +21,6 @@ namespace GNLrclib.UI.Config
         [AutoPostBack("updateconfig", nameof(EnablePlugin))]
         public bool EnablePlugin { get; set; } = true;
 
-        [DisplayName("LRCLIB App ID")]
-        [Description("Your registered LRCLIB client-side application id, sent in the Lrclib-App-Id header. Leave empty to send requests without one.")]
-        [AutoPostBack("updateconfig", nameof(LrcLibAppId))]
-        public string LrcLibAppId { get; set; } = string.Empty;
-
         public CaptionItem LyricsHeading { get; set; } = new CaptionItem("Lyrics Files");
 
         [DisplayName("Save plain-text lyrics when no synced lyrics exist")]

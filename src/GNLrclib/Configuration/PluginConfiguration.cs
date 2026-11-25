@@ -29,12 +29,6 @@ namespace GNLrclib.Configuration
             new List<LibraryPathFilterItem>();
 
         /// <summary>
-        /// Public LRCLIB client-side application id, sent as the Lrclib-App-Id
-        /// header. Empty means requests are sent without an application id.
-        /// </summary>
-        public string LrcLibAppId { get; set; } = string.Empty;
-
-        /// <summary>
         /// When LRCLIB only has unsynchronised lyrics, save them as a .txt
         /// sidecar (and keep looking for a synced version later).
         /// </summary>

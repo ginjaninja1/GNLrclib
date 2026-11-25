@@ -21,6 +21,9 @@ namespace GNLrclib.Services
     {
         private const string LookupUrl = "https://lrclib.net/api/get";
 
+        // Fixed LRCLIB client id. Keep this here so it is easy to update.
+        private const string LrcLibAppId = "60ZiUAIPottC2C1q8J0_Ea-1DMP7LnZsC_SiSmTa4_g";
+
         /// <summary>LRCLIB recommends 200-500 ms between requests.</summary>
         private static readonly TimeSpan MinimumRequestInterval = TimeSpan.FromMilliseconds(400);
 
@@ -119,10 +122,7 @@ namespace GNLrclib.Services
 
             this.logger.Debug("Sending LRCLIB exact lookup: track='{0}', artist='{1}', album='{2}', duration={3}s", signature.TrackName, signature.ArtistName, signature.AlbumName, signature.DurationSeconds);
 
-            if (!string.IsNullOrWhiteSpace(settings.LrcLibAppId))
-            {
-                options.RequestHeaders["Lrclib-App-Id"] = settings.LrcLibAppId.Trim();
-            }
+            options.RequestHeaders["Lrclib-App-Id"] = LrcLibAppId;
 
             try
             {
@@ -196,7 +196,7 @@ namespace GNLrclib.Services
                     return LyricsLookupResult.Unavailable;
 
                 case 401:
-                    this.Block(RejectedAppIdPause, "rejected the Lrclib-App-Id header (HTTP 401); check the LRCLIB App ID in the plugin settings");
+                    this.Block(RejectedAppIdPause, "rejected the Lrclib-App-Id header (HTTP 401); check the configured LRCLIB App ID");
                     return LyricsLookupResult.Unavailable;
 
                 default:
