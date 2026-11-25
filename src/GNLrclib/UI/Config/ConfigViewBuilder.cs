@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Emby.Web.GenericEdit.Elements;
 using Emby.Web.GenericEdit.Elements.List;
 using MediaBrowser.Model.Entities;
 using GNLrclib.Configuration;
-using MediaBrowser.Model.Tasks;
 
 namespace GNLrclib.UI.Config
 {
@@ -25,39 +24,17 @@ namespace GNLrclib.UI.Config
     {
         public static ConfigUI BuildDisplayConfig(
             PluginConfiguration persistedConfig,
-            IReadOnlyList<VirtualFolderInfo> currentFolders,
-            ITaskManager taskManager)
+            IReadOnlyList<VirtualFolderInfo> currentFolders)
         {
-            // 1. Interrogate the task manager registry using your explicit task string Key
-            var myTaskWorker = taskManager.ScheduledTasks
-                .FirstOrDefault(t => string.Equals(t.ScheduledTask.Key, "GNLrclibTask", StringComparison.Ordinal));
-
-            // 2. Build the router fragment location using the dynamically discovered worker ID
-            string hyperlinkUrl = myTaskWorker != null
-                ? $"/scheduledtask?id={myTaskWorker.Id}"
-                : "/scheduledtasks";
-
-
             var display = new ConfigUI
             {
                 EnablePlugin = persistedConfig.EnablePlugin,
                 LibraryPaths = persistedConfig.LibraryPaths,
-
-                // 3. Construct the list item element object hierarchy inside instantiation block
-                ScheduledTaskLink = new GenericItemList
-                {
-                    new GenericListItem
-                    {
-                        PrimaryText = "Configure Scheduled Task",
-                        SecondaryText = "Manage background execution rules and automation intervals",
-                        Icon = IconNames.link,
-                        Status = ItemStatus.Succeeded,
-                        HyperLink = hyperlinkUrl,
-                        HyperLinkTargetExternal = false // Directs Emby to leverage internal app routing
-                    }
-                }
-
-
+                LrcLibAppId = persistedConfig.LrcLibAppId,
+                WritePlainTextWhenNoSyncedLyrics = persistedConfig.WritePlainTextWhenNoSyncedLyrics,
+                ReplacePlainTextSidecarWhenSyncedFound = persistedConfig.ReplacePlainTextSidecarWhenSyncedFound,
+                MinRecheckIntervalDays = persistedConfig.MinRecheckIntervalDays,
+                MaxRecheckIntervalDays = persistedConfig.MaxRecheckIntervalDays
             };
 
             display.LibraryList.Clear();
@@ -171,7 +148,7 @@ namespace GNLrclib.UI.Config
                 PrimaryText = folder.Name,
                 SecondaryText = description,
 
-                Icon = IconNames.video_library,
+                Icon = IconNames.audiotrack,
                 IconMode = ItemListIconMode.LargeRegular,
 
                 Status = libraryEnabled

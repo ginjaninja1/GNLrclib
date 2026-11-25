@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MediaBrowser.Model.Entities;
@@ -6,8 +6,8 @@ using MediaBrowser.Model.Entities;
 namespace GNLrclib.UI.Config
 {
     /// <summary>
-    /// Poster To Folder only makes sense for libraries that hold movies or
-    /// TV shows. Playlists, Music, Books, Home Videos, etc. should never be
+    /// LRCLIB Lyrics only makes sense for libraries that hold music. Movies,
+    /// TV shows, Playlists, Books, Home Videos, etc. should never be
     /// offered in the config UI, never have paths added to LibraryPaths, and
     /// never be considered by the scheduled task.
     ///
@@ -20,8 +20,7 @@ namespace GNLrclib.UI.Config
     {
         private static readonly string[] AllowedCollectionTypes =
         {
-            "movies",
-            "tvshows"
+            "music"
         };
 
         public static bool IsRelevant(VirtualFolderInfo folder)

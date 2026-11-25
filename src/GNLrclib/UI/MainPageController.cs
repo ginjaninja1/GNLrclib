@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Controller;
+using MediaBrowser.Controller;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Plugins.UI;
@@ -33,8 +33,8 @@ namespace GNLrclib.UI
             {
                 Name = "GNLrclib",
                 EnableInMainMenu = false,
-                DisplayName = "Poster To Folder",
-                MenuIcon = "image",
+                DisplayName = "LRCLIB Lyrics",
+                MenuIcon = "subtitles",
                 IsMainConfigPage = true
             };
         }

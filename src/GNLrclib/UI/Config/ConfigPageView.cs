@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediaBrowser.Controller;
@@ -11,7 +11,6 @@ using MediaBrowser.Model.Serialization;
 using GNLrclib.Configuration;
 using GNLrclib.UIBaseClasses.Views;
 using GNLrclib.UI.Config;
-using MediaBrowser.Model.Tasks;
 
 namespace GNLrclib.UI
 {
@@ -33,7 +32,6 @@ namespace GNLrclib.UI
         private readonly ILibraryManager libraryManager;
         private readonly IJsonSerializer jsonSerializer;
         private readonly ILogger logger;
-        private readonly ITaskManager taskManager;
 
         public ConfigPageView(
             PluginInfo pluginInfo,
@@ -44,7 +42,6 @@ namespace GNLrclib.UI
             this.logger = logger;
             this.libraryManager = applicationHost.Resolve<ILibraryManager>();
             this.jsonSerializer = applicationHost.Resolve<IJsonSerializer>();
-            this.taskManager = applicationHost.Resolve<ITaskManager>();
             this.ShowSave = false;
             this.ShowBack = true;
             this.AllowBack = true;
@@ -52,8 +49,8 @@ namespace GNLrclib.UI
         }
 
         /// <summary>
-        /// Only libraries relevant to this plugin (movies/TV shows) - see
-        /// RelevantLibraryTypes. Playlists, Music, etc. never appear.
+        /// Only libraries relevant to this plugin (music) - see
+        /// RelevantLibraryTypes. Movies, TV shows, Playlists, etc. never appear.
         /// </summary>
         private IReadOnlyList<VirtualFolderInfo> GetRelevantFolders()
         {
@@ -75,7 +72,7 @@ namespace GNLrclib.UI
 
             LibraryPathReconciler.EnsureDiscoveredPaths(config, currentFolders);
 
-            this.ContentData = ConfigViewBuilder.BuildDisplayConfig(config, currentFolders, this.taskManager);
+            this.ContentData = ConfigViewBuilder.BuildDisplayConfig(config, currentFolders);
         }
 
         public override Task<IPluginUIView> OnSaveCommand(
@@ -143,16 +140,21 @@ namespace GNLrclib.UI
                 if (incoming != null)
                 {
                     config.EnablePlugin = incoming.EnablePlugin;
+                    config.LrcLibAppId = (incoming.LrcLibAppId ?? string.Empty).Trim();
+                    config.WritePlainTextWhenNoSyncedLyrics = incoming.WritePlainTextWhenNoSyncedLyrics;
+                    config.ReplacePlainTextSidecarWhenSyncedFound = incoming.ReplacePlainTextSidecarWhenSyncedFound;
+                    config.MinRecheckIntervalDays = incoming.MinRecheckIntervalDays;
+                    config.MaxRecheckIntervalDays = incoming.MaxRecheckIntervalDays;
                     config.LibraryPaths = incoming.LibraryPaths ?? new List<LibraryPathFilterItem>();
 
                     Plugin.Instance.SaveConfiguration();
 
-                    this.logger.Info("Poster To Folder configuration saved");
+                    this.logger.Info("LRCLIB Lyrics configuration saved");
                 }
             }
             catch (Exception ex)
             {
-                this.logger.ErrorException("Error saving Poster To Folder configuration", ex);
+                this.logger.ErrorException("Error saving LRCLIB Lyrics configuration", ex);
             }
 
             RebuildContentData();

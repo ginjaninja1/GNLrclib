@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Common;
+using MediaBrowser.Common;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller;
@@ -10,7 +10,7 @@ using GNLrclib.Configuration;
 using GNLrclib.UI;
 using System;
 using System.Collections.Generic;
-using System.IO; 
+using System.IO;
 
 namespace GNLrclib
 {
@@ -48,15 +48,15 @@ namespace GNLrclib
 
 
         public override string Description =>
-            "Copies poster.ext to folder.ext for movies and TV shows that are missing a folder image.";
+            "Downloads missing synchronised lyrics (.lrc) for music tracks from LRCLIB during library scans and metadata refreshes.";
 
 
         public override Guid Id =>
-            new Guid("1dbb7a54-44ed-4840-8226-838d9d648ecf");
+            new Guid("0ada88fc-f674-4fe0-8ff5-f4c29461b2cd");
 
 
         public override string Name =>
-            "Poster To Folder";
+            "LRCLIB Lyrics";
 
 
         public ImageFormat ThumbImageFormat =>

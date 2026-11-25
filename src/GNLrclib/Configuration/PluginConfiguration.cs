@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using MediaBrowser.Model.Plugins;
 using GNLrclib.UI.Config;
 
@@ -22,9 +22,34 @@ namespace GNLrclib.Configuration
         public bool EnablePlugin { get; set; } = true;
 
         /// <summary>
-        /// The real, persisted library/path filter data.
+        /// The real, persisted library/path filter data. Only music tracks
+        /// under an enabled path are ever looked up; nothing is enabled by default.
         /// </summary>
         public List<LibraryPathFilterItem> LibraryPaths { get; set; } =
             new List<LibraryPathFilterItem>();
+
+        /// <summary>
+        /// Public LRCLIB client-side application id, sent as the Lrclib-App-Id
+        /// header. Empty means requests are sent without an application id.
+        /// </summary>
+        public string LrcLibAppId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// When LRCLIB only has unsynchronised lyrics, save them as a .txt
+        /// sidecar (and keep looking for a synced version later).
+        /// </summary>
+        public bool WritePlainTextWhenNoSyncedLyrics { get; set; } = true;
+
+        /// <summary>
+        /// When synced lyrics are found for a track that only has a .txt
+        /// sidecar, move that .txt to the recycle bin.
+        /// </summary>
+        public bool ReplacePlainTextSidecarWhenSyncedFound { get; set; } = true;
+
+        /// <summary>Shortest wait before a track that was checked without success is checked again.</summary>
+        public int MinRecheckIntervalDays { get; set; } = 3;
+
+        /// <summary>Longest wait before such a track is checked again.</summary>
+        public int MaxRecheckIntervalDays { get; set; } = 90;
     }
 }
