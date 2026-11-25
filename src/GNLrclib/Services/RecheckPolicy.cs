@@ -30,6 +30,17 @@ namespace GNLrclib.Services
 
         public bool IsDue(DateTime itemDateCreatedUtc, DateTime lastCheckedUtc, DateTime nowUtc)
         {
+            return nowUtc >= this.GetNextCheckUtc(itemDateCreatedUtc, lastCheckedUtc);
+        }
+
+        public DateTime GetNextCheckUtc(DateTime itemDateCreatedUtc, DateTime lastCheckedUtc)
+        {
+            var interval = this.GetInterval(itemDateCreatedUtc, lastCheckedUtc);
+            return lastCheckedUtc + interval;
+        }
+
+        private TimeSpan GetInterval(DateTime itemDateCreatedUtc, DateTime nowUtc)
+        {
             var itemAge = nowUtc - itemDateCreatedUtc;
 
             if (itemAge < TimeSpan.Zero)
@@ -48,7 +59,7 @@ namespace GNLrclib.Services
                 interval = this.maximumInterval;
             }
 
-            return nowUtc - lastCheckedUtc >= interval;
+            return interval;
         }
     }
 }

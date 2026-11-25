@@ -89,9 +89,16 @@ namespace GNLrclib.Providers
             }
 
             var inventory = LyricsInventory.FromStreams(audio.GetMediaStreams());
-            var work = this.evaluator.Evaluate(audio, inventory, RecheckPolicy.FromSettings(settings), DateTime.UtcNow);
-            this.logger.Debug("Lyrics change check for {0}: work={1}, signature={2}", audio.Path, work, FormatSignature(signature));
-            return work != LyricsWork.None;
+            var decision = this.evaluator.Evaluate(audio, inventory, RecheckPolicy.FromSettings(settings), DateTime.UtcNow);
+            this.logger.Debug("Lyrics change check for {0}: work={1}, reason={2}, lastOutcome={3}, nextCheckUtc={4}, signature={5}, lyrics={6}",
+                audio.Path,
+                decision.Work,
+                decision.Reason,
+                decision.LastOutcome.HasValue ? decision.LastOutcome.Value.ToString() : "none",
+                decision.NextCheckUtc.HasValue ? decision.NextCheckUtc.Value.ToString("o") : "none",
+                FormatSignature(signature),
+                inventory.Description);
+            return decision.Work != LyricsWork.None;
         }
 
         public async Task<ItemUpdateType> FetchAsync(
@@ -125,20 +132,31 @@ namespace GNLrclib.Providers
 
             var inventory = LyricsInventory.FromStreams(streams);
             var now = DateTime.UtcNow;
-            var work = this.evaluator.Evaluate(item, inventory, RecheckPolicy.FromSettings(settings), now);
+            var decision = this.evaluator.Evaluate(item, inventory, RecheckPolicy.FromSettings(settings), now);
 
-            if (work == LyricsWork.None)
+            if (decision.Work == LyricsWork.None)
             {
-                this.logger.Debug("Lyrics refresh skipped for {0}: no work due (embedded/synced lyrics present, prior synced result, or negative-result recheck not due)", item.Path);
+                this.logger.Debug("Lyrics refresh skipped for {0}: reason={1}, lastOutcome={2}, nextCheckUtc={3}, lyrics={4}",
+                    item.Path,
+                    decision.Reason,
+                    decision.LastOutcome.HasValue ? decision.LastOutcome.Value.ToString() : "none",
+                    decision.NextCheckUtc.HasValue ? decision.NextCheckUtc.Value.ToString("o") : "none",
+                    inventory.Description);
                 return ItemUpdateType.None;
             }
 
             try
             {
-                this.logger.Debug("Starting LRCLIB lookup for {0}: work={1}, signature={2}, lyrics={3}", item.Path, work, FormatSignature(signature), inventory.Description);
+                this.logger.Debug("Starting LRCLIB lookup for {0}: work={1}, reason={2}, lastOutcome={3}, signature={4}, lyrics={5}",
+                    item.Path,
+                    decision.Work,
+                    decision.Reason,
+                    decision.LastOutcome.HasValue ? decision.LastOutcome.Value.ToString() : "none",
+                    FormatSignature(signature),
+                    inventory.Description);
                 var result = await this.client.FindAsync(signature, settings, cancellationToken).ConfigureAwait(false);
                 this.logger.Debug("LRCLIB lookup finished for {0}: outcome={1}", item.Path, result.Outcome);
-                this.Apply(item, work, inventory, result, settings, now);
+                this.Apply(item, decision.Work, inventory, result, settings, now);
             }
             catch (OperationCanceledException)
             {
