@@ -60,11 +60,13 @@ namespace GNLrclib.Services
 
                 if (now < this.blockedUntilUtc)
                 {
+                    this.logger.Debug("LRCLIB lookup not sent: circuit breaker is open for another {0:0} seconds", (this.blockedUntilUtc - now).TotalSeconds);
                     return LyricsLookupResult.Unavailable;
                 }
 
                 if (now < this.nextRequestAllowedUtc)
                 {
+                    this.logger.Debug("Throttling LRCLIB lookup by {0:0} ms", (this.nextRequestAllowedUtc - now).TotalMilliseconds);
                     await Task.Delay(this.nextRequestAllowedUtc - now, cancellationToken).ConfigureAwait(false);
                 }
 
@@ -96,7 +98,8 @@ namespace GNLrclib.Services
         private static string BuildUserAgent()
         {
             var version = typeof(LrcLibClient).Assembly.GetName().Version;
-            return "EmbyLrcLibLyrics/" + (version == null ? "0.0.0" : version.ToString(3)) + " (https://github.com/ginjaninja1/GNLrclib)";
+            var versionString = version?.ToString() ?? "0.0.0.1";
+            return $"GinjaninjaEmbyLrclib v{versionString} (https://github.com/ginjaninja1/GNLrclib)";
         }
 
         private async Task<LyricsLookupResult> SendAsync(
@@ -114,6 +117,8 @@ namespace GNLrclib.Services
                 LogRequestAsDebug = true,
             };
 
+            this.logger.Debug("Sending LRCLIB exact lookup: track='{0}', artist='{1}', album='{2}', duration={3}s", signature.TrackName, signature.ArtistName, signature.AlbumName, signature.DurationSeconds);
+
             if (!string.IsNullOrWhiteSpace(settings.LrcLibAppId))
             {
                 options.RequestHeaders["Lrclib-App-Id"] = settings.LrcLibAppId.Trim();
@@ -125,8 +130,12 @@ namespace GNLrclib.Services
                 {
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        return this.Parse(response.Content);
+                        var parsed = this.Parse(response.Content);
+                        this.logger.Debug("LRCLIB HTTP 200 parsed as {0}", parsed.Outcome);
+                        return parsed;
                     }
+
+                    this.logger.Debug("LRCLIB returned HTTP {0}", (int)response.StatusCode);
 
                     string retryAfter = null;
 
@@ -142,6 +151,7 @@ namespace GNLrclib.Services
             {
                 if (ex.StatusCode.HasValue)
                 {
+                    this.logger.Debug("LRCLIB request raised HTTP {0}", (int)ex.StatusCode.Value);
                     return this.ClassifyFailure(ex.StatusCode.Value, null);
                 }
 

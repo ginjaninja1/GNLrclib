@@ -19,6 +19,8 @@ namespace GNLrclib.Models
 
         public IReadOnlyList<string> PlainTextSidecarPaths { get; private set; } = NoPaths;
 
+        public string Description => string.Format("embedded={0}, syncedSidecar={1}, plainTextSidecars={2}", this.HasEmbeddedLyrics, this.HasSyncedSidecar, this.PlainTextSidecarPaths.Count);
+
         public static LyricsInventory FromStreams(IEnumerable<MediaStream> streams)
         {
             var inventory = new LyricsInventory();

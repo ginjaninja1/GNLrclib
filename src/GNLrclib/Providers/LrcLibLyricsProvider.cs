@@ -71,17 +71,27 @@ namespace GNLrclib.Providers
             var settings = Plugin.Instance == null ? null : Plugin.Instance.Configuration;
             var audio = item as Audio;
 
-            if (audio == null
-                || !IsEnabledFor(audio, settings)
-                || !TrackSignature.TryCreate(audio, out _))
+            if (audio == null)
             {
                 return false;
             }
 
-            var inventory = LyricsInventory.FromStreams(audio.GetMediaStreams());
+            if (!IsEnabledFor(audio, settings))
+            {
+                this.logger.Debug("Lyrics change check skipped for {0}: plugin disabled, item not saved/local, or path is outside enabled library paths", audio.Path);
+                return false;
+            }
 
-            return this.evaluator.Evaluate(audio, inventory, RecheckPolicy.FromSettings(settings), DateTime.UtcNow)
-                != LyricsWork.None;
+            if (!TrackSignature.TryCreate(audio, out var signature))
+            {
+                this.logger.Debug("Lyrics change check skipped for {0}: title, artist, or usable duration is missing", audio.Path);
+                return false;
+            }
+
+            var inventory = LyricsInventory.FromStreams(audio.GetMediaStreams());
+            var work = this.evaluator.Evaluate(audio, inventory, RecheckPolicy.FromSettings(settings), DateTime.UtcNow);
+            this.logger.Debug("Lyrics change check for {0}: work={1}, signature={2}", audio.Path, work, FormatSignature(signature));
+            return work != LyricsWork.None;
         }
 
         public async Task<ItemUpdateType> FetchAsync(
@@ -95,6 +105,7 @@ namespace GNLrclib.Providers
 
             if (!IsEnabledFor(item, settings))
             {
+                this.logger.Debug("Lyrics refresh skipped for {0}: plugin disabled, item not saved/local, or path is outside enabled library paths", item.Path);
                 return ItemUpdateType.None;
             }
 
@@ -118,12 +129,15 @@ namespace GNLrclib.Providers
 
             if (work == LyricsWork.None)
             {
+                this.logger.Debug("Lyrics refresh skipped for {0}: no work due (embedded/synced lyrics present, prior synced result, or negative-result recheck not due)", item.Path);
                 return ItemUpdateType.None;
             }
 
             try
             {
+                this.logger.Debug("Starting LRCLIB lookup for {0}: work={1}, signature={2}, lyrics={3}", item.Path, work, FormatSignature(signature), inventory.Description);
                 var result = await this.client.FindAsync(signature, settings, cancellationToken).ConfigureAwait(false);
+                this.logger.Debug("LRCLIB lookup finished for {0}: outcome={1}", item.Path, result.Outcome);
                 this.Apply(item, work, inventory, result, settings, now);
             }
             catch (OperationCanceledException)
@@ -137,6 +151,11 @@ namespace GNLrclib.Providers
 
             // Nothing on the item itself changes; the new sidecar is ingested by the probe on a later scan.
             return ItemUpdateType.None;
+        }
+
+        private static string FormatSignature(TrackSignature signature)
+        {
+            return string.Format("track='{0}', artist='{1}', album='{2}', duration={3}s", signature.TrackName, signature.ArtistName, signature.AlbumName, signature.DurationSeconds);
         }
 
         public void Dispose()
