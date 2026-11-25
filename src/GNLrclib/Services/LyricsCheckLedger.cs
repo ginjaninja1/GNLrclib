@@ -81,6 +81,42 @@ namespace GNLrclib.Services
             this.saveTimer.Change(SaveDelay, Timeout.InfiniteTimeSpan);
         }
 
+        /// <summary>Removes ledger entries whose item ids are no longer present in Emby's library.</summary>
+        public IReadOnlyList<string> PruneExcept(ISet<string> activeItemIds)
+        {
+            var removed = new List<string>();
+
+            lock (this.sync)
+            {
+                var staleIds = new List<string>();
+                foreach (var itemId in this.entries.Keys)
+                {
+                    if (!activeItemIds.Contains(itemId))
+                    {
+                        staleIds.Add(itemId);
+                    }
+                }
+
+                foreach (var itemId in staleIds)
+                {
+                    this.entries.Remove(itemId);
+                    removed.Add(itemId);
+                }
+
+                if (removed.Count > 0)
+                {
+                    this.isDirty = true;
+                }
+            }
+
+            if (removed.Count > 0)
+            {
+                this.saveTimer.Change(SaveDelay, Timeout.InfiniteTimeSpan);
+            }
+
+            return removed;
+        }
+
         public void Dispose()
         {
             this.saveTimer.Dispose();

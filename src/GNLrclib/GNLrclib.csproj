@@ -5,7 +5,7 @@
     <AssemblyName>GNLrclib</AssemblyName>
     <RootNamespace>GNLrclib</RootNamespace>
     <LangVersion>latest</LangVersion>
-	  <Version>0.0.0.3</Version>
+	  <Version>0.0.0.4</Version>
 	  <Nullable>annotations</Nullable>
     
     
